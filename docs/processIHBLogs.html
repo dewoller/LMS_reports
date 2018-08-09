@@ -326,7 +326,8 @@ div.section {
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
-<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown file has staged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
 </details>
 </li>
 <li>
@@ -345,33 +346,96 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> 841c83f </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/dewoller/LMS_reports/tree/11516bff233c9e3e28604b1f32661f719e342a0f" target="_blank">11516bf</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
+    Ignored:    analysis/figure/
     Ignored:    docs/figure/
     Ignored:    logs/
-
-Untracked files:
-    Untracked:  analysis/processHSILogs.Rmd
-    Untracked:  lib/functions_preload.R
-
-Unstaged changes:
-    Modified:   analysis/processIHBLogs.Rmd
-    Modified:   data/ip_locations.csv
-    Modified:   lib/functions.R
-
-Staged changes:
-    Modified:   .gitignore
-    New:        analysis/processIHBLogs.Rmd
-    New:        data/ip_locations.csv
-    New:        lib/functions.R
-    New:        lib/getStats.sh
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
 </li>
 </ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/LMS_reports/blob/11516bff233c9e3e28604b1f32661f719e342a0f/analysis/processIHBLogs.Rmd" target="_blank">11516bf</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-08-09
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/processIHBLogs.Rmd”)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/dewoller/LMS_reports/ab086418359f0e20882810608f39334e20254475/docs/processIHBLogs.html" target="_blank">ab08641</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-08-09
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/dewoller/LMS_reports/blob/d26b22c09c47c442e015780b09b02ee0274772fd/analysis/processIHBLogs.Rmd" target="_blank">d26b22c</a>
+</td>
+<td style="text-align:left;">
+Dennis Wollersheim
+</td>
+<td style="text-align:left;">
+2018-08-09
+</td>
+<td style="text-align:left;">
+wflow_publish(“analysis/processIHBLogs.Rmd”)
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
 <hr />
 <div id="marks-for-the-class-logs_2018-him3hibbu-2him5ihbbu-2_20180809-1254.csv-for-the-period-2018-07-16-2018-08-09-overall-lms-participation-by-student" class="section level1">
 <h1>Marks for the class logs_2018-HIM3HIB(BU-2)HIM5IHB(BU-2)_20180809-1254.csv For the period : 2018-07-16, 2018-08-09 — ## Overall LMS participation by student</h1>
@@ -380,37 +444,23 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <div id="access-to-each-component-over-the-semester" class="section level1">
 <h1>access to each component over the semester</h1>
 <p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
-</div>
-<div id="total-access-vs-marks-for-5-most-accessed-components" class="section level1">
-<h1>total access vs marks for 5 most accessed components</h1>
-<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
-</div>
-<div id="access-vs-marks-overall-by-person" class="section level1">
-<h1>access vs marks overall by person</h1>
-<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>LMS accesses in Victoria, off campus</p>
-<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/processIHBLogs.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/processIHBLogs.Rmd/unnamed-chunk-2-2.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="non-bundoora-melbourne-latrobe-cities" class="section level1">
 <h1>non bundoora / melbourne / latrobe cities</h1>
 </div>
 <div id="which-isps" class="section level1">
 <h1>which ISP’s</h1>
-<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="lms-accesses-from-inside-victoria" class="section level1">
 <h1>LMS accesses from inside Victoria</h1>
-<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="lms-accesses-from-outside-the-australia" class="section level1">
 <h1>LMS accesses from outside the Australia</h1>
-<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
-</div>
-<div id="access-vs-marks-overall-by-person-and-week" class="section level1">
-<h1>access vs marks overall by person and week</h1>
-<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/processIHBLogs.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/processIHBLogs.Rmd/unnamed-chunk-9-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/processIHBLogs.Rmd/unnamed-chunk-9-4.png" width="672" style="display: block; margin: auto;" /></p>
-<div id="session-information" class="section level2">
-<h2>Session information</h2>
+<p><img src="figure/processIHBLogs.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre><code>R version 3.4.4 (2018-03-15)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 17.10
@@ -471,7 +521,6 @@ loaded via a namespace (and not attached):
 [88] broom_0.5.0        e1071_1.6-8        later_0.7.3       
 [91] class_7.3-14       viridisLite_0.3.0  iterators_1.0.10  
 [94] units_0.6-0       </code></pre>
-</div>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
