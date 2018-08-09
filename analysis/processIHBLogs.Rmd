@@ -227,17 +227,17 @@ tm_shape(World) +
 
 #tmap_mode("plot")
 
-
+eval_cell=TRUE
 if (!(sum(marks$subject_total_real, na.rm=TRUE) > 0 )) {
-  q()
+  eval_cell = FALSE
 }
 
 ```
 
 
-# total access vs marks for 5 most accessed components
+`r if (eval_cell) '# total access vs marks for 5 most accessed components'`
 
-```{r }
+```{r   eval=eval_cell  }
 # access vs marks
 
 log %>%
@@ -253,9 +253,9 @@ log %>%
 
 ```
 
-# access vs marks overall by person
+`r if (eval_cell) '# access vs marks overall by person'`
 
-```{r}
+```{r  eval=eval_cell }
 
 
 log %>%
@@ -272,10 +272,10 @@ log %>%
 
 ```
 
-# access vs marks overall by person and week
+`r if (eval_cell) '# access vs marks overall by person and week'`
 
 
-```{r}
+```{r  eval=eval_cell }
 
 log %>%
   count( user_full_name, semester_week)  %>%
@@ -327,43 +327,5 @@ log %>%
   ylab( "Number of LMS Accesses ") + 
   facet_wrap( ~semester_week, scales='free_y', ncol=3 )
 
+}
 
-
-# access vs quiz marks for each week of the semester  
-#Generally, the more lesson accesses, the higher mark, for a certain week.
-#note timing might be off
-
-#
-#log %>% 
-#  count( semester_week ) %>%
-#  top_n( 12, n ) %>% 
-#  { . } -> top_12_weeks
-#
-#marks %>%
-#  select( user_full_name, starts_with('quiz_') ) %>%
-#  gather( semester_week, quiz_mark, -user_full_name, na.rm=TRUE ) %>%
-#  mutate( semester_week = semester_week %>% str_replace_all('quiz_week_','') %>%
-#                  str_replace_all('_quiz_real','') %>%
-#                  as.numeric()
-#        ) %>% 
-#  { . } -> marksl
-#
-#
-#log %>%
-#  inner_join( top_12_weeks, by='semester_week') %>%
-#  inner_join( top5_component, by='component' ) %>%
-#  count( user_full_name, semester_week)  %>%
-#  inner_join( marksl ) %>%
-#  ggplot( aes(quiz_mark, n)) +
-#  xlab( "quiz_mark") +
-#  ylab( "number of LMS accesses for this week ") + 
-#  geom_smooth() +
-#  geom_text(aes(label=user_full_name)) +
-#  geom_point() +
-#  facet_wrap_paginate( ~semester_week, ncol=1, nrow=1) %>% 
-#  { . } ->  p
-#  class(p) <- c('gg_multiple', class(p))
-#  print(p)
-#
-
-```
