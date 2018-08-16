@@ -1,5 +1,5 @@
 ---
-title:           new document
+title:           2018-HIM4HIS / HIM5IHS Stats and grades
 author:          Dennis Wollersheim 
 date:            16.06.2018
 linkcolor:       cyan
