@@ -8,9 +8,9 @@ navbar:
     - text: "Classes"
       menu:
       - text: "Informatics B"
-        href: ProcessIHBLogs.html
+        href: processIHBLogs.html
       - text: "Project Management"
-        href: ProcessHSILogs.html
+        href: processHSILogs.html
     - text: "About"
       href: about.html
     - text: "License"
