@@ -31,9 +31,11 @@ marks = data[['marks']]
 ```
 
 # Marks for the class `r  class_name`
+
 For the period : `r log %>% summarise( min(time), max(time)) `
 ---
-`r if (!private) '## Overall LMS participation by student'`
+
+`r if (private) '## Overall LMS participation by student'`
 
 
 ```{r introduction }
@@ -160,7 +162,7 @@ ggtitle( 'Top 20 localities for access LMS from off campus')
 
 ```
 
-`r if (!private) '# non bundoora / melbourne / latrobe cities'`
+`r if (private) '# non bundoora / melbourne / latrobe cities'`
 
 ```{r }
 
