@@ -21,6 +21,8 @@ source('lib/functions.R')
 opts_chunk$set(message=FALSE, warning=FALSE, echo=FALSE, comment=NA) 
 marks_root = '2018-HIM4IHS'
 weeks_semester_start = 30
+private=FALSE
+pdf=FALSE
 
 data = get_data( marks_root )
 log = data[['log']]
@@ -31,33 +33,55 @@ marks = data[['marks']]
 ```
 
 # Marks for the class `r  class_name`
+
 For the period : `r log %>% summarise( min(time), max(time)) `
----
+
 ## Overall LMS participation by student
 
 ```{r introduction }
 
+if (private)  {
+  # overall
+  log %>%
+    group_by( semester_week ) %>%
+    count( user_full_name, component ) %>%
+    ggplot( aes( semester_week, n, fill=component)) +
+    geom_col() +
+    facet_wrap( ~user_full_name, ncol=3) 
 
-# overall
+}
+
 log %>%
   group_by( semester_week ) %>%
-  count( user_full_name, component ) %>%
-  ggplot( aes( semester_week, n, fill=component)) +
-  geom_col() +
-  facet_wrap( ~user_full_name, ncol=3) 
+  count( user_full_name, student_id_final_digit ) %>%
+  ggplot( aes( semester_week, n)) +
+  geom_line( aes( group = user_full_name, color=student_id_final_digit)) +
+  ggtitle( "Number of LMS visits per week by student, identified by student id last number")
 
-
-# overall
 log %>%
+  mutate( semester_week = as.factor(semester_week) ) %>%
   group_by( semester_week ) %>%
-  count( user_full_name, component ) %>%
-  ggplot( aes( semester_week, n, fill=component)) +
-  geom_col() +
-  facet_wrap_paginate( ~user_full_name, ncol=3, nrow=3) %>% 
-  { . } ->  p
-  class(p) <- c('gg_multiple', class(p))
-  print(p)
+  count( subject_code, user_full_name, student_id_final_digit ) %>%
+  group_by( semester_week, subject_code ) %>%
+  mutate(outlier = ifelse(is_outlier(n), student_id_final_digit, as.character(NA))) %>%
+  #filter( !is.na(outlier)) %>%
+  ggplot( aes( semester_week, n, fill=subject_code)) +
+  geom_boxplot( ) +
+  ggtitle( "Number of LMS visits per week for whole class")
 
+
+if (pdf) {
+  # overall
+  log %>%
+    group_by( semester_week ) %>%
+    count( user_full_name, component ) %>%
+    ggplot( aes( semester_week, n, fill=component)) +
+    geom_col() +
+    facet_wrap_paginate( ~user_full_name, ncol=3, nrow=3) %>% 
+    { . } ->  p
+    class(p) <- c('gg_multiple', class(p))
+    print(p)
+}
 ```
 
 # access to each component over the semester
@@ -74,23 +98,273 @@ log %>%
   count( user_full_name, component ) %>%
   ggplot( aes( semester_week, n, fill=component)) +
   geom_col() +
-  facet_wrap( ~component, ncol=2)
+  facet_wrap( ~component, ncol=2) +
+  ggtitle ("what portion of LMS do people access")
+
+```
+
+
+LMS accesses in Victoria, off campus
+
+```{r }
+
+area <- read_shape("~/mydoc/research/mofi/shapefiles/LGA11aAust.shp") 
+area %>% 
+  subset( STATE_CODE==2 )  %>% 
+  {.} -> vic_area
+#
+vic_area %>% simplify_shape(0.1) %>%
+  {.} -> vic_simp
+#
+
+reorder_size <- function(x) {
+  factor(x, levels = names(sort(table(x))))
+}
+
+log %>%
+  filter( isp != 'Latrobe University' &
+         city_name != 'Melbourne'  &
+         city_name != 'Bundoora' ) %>% 
+inner_join( count( ., city_name ) %>% top_n( 20) ) %>%
+mutate( city_name = reorder_size( city_name )) %>%
+count(city_name, subject_code  ) %>%
+ggplot(aes(city_name, y=nn, fill=subject_code)) +
+geom_col() + 
+xlab('City Name') +
+ylab('Number of accesses') +
+rotate() +
+ggtitle( 'Top 20 localities for access LMS from off campus')
+
+
+
+log %>%
+  filter( isp != 'Latrobe University' &
+         city_name != 'Melbourne'  &
+         city_name != 'Bundoora' ) %>% 
+inner_join( count( ., city_name ) %>% top_n( 20) ) %>%
+mutate( city_name = reorder_size( city_name )) %>%
+count(city_name, semester_week  ) %>%
+ggplot(aes(city_name, y=nn, fill=semester_week)) +
+geom_col() + 
+xlab('City Name') +
+ylab('Number of accesses') +
+rotate() +
+ggtitle( 'Top 20 localities for access LMS from off campus')
+
+
+
+```
+
+# non bundoora / melbourne / latrobe cities
+
+```{r }
+
+if (private) {
+  log %>%
+    filter( isp != 'Latrobe University' &
+           city_name != 'Melbourne'  &
+           city_name != 'Bundoora' ) %>% 
+  ggplot(aes(reorder_size( city_name), fill=user_full_name)) +
+  geom_bar() + 
+  rotate()
+}
+```
+
+# which ISP's 
+
+```{r }
+
+log %>%
+  ggplot(aes(reorder_size( isp), fill=country_code)) +
+  geom_bar() + 
+  rotate() + 
+  ggtitle( 'ISPs accessing LMS') +
+  xlab( 'ISP') + ylab( 'Number of accesses')
+
+
+```
+
+#LMS accesses from inside Victoria
+
+```{r }
+
+log %>% 
+  filter( as.character( zip_code ) %>% startsWith('3') ) %>%
+  filter( country_code=='AU' & isp != 'Latrobe University' ) %>% 
+  count(  longitude, latitude, semester_week ) %>% 
+  mutate( logn=log10( n ) ) %>%
+  SpatialPointsDataFrame(coords = .[,1:2], data=., proj4string=CRS("+proj=longlat +datum=WGS84")) %>% 
+  { . } -> pts
+
+tm_shape(vic_simp) +
+  tm_borders() + 
+  tm_shape( pts ) +
+  tm_bubbles( size='logn', col='semester_week'  ) +
+  tm_style_gray() + 
+  tm_format_World() +
+  tm_layout("LMS accesses inside victoria")
+
+```
+
+#LMS accesses from outside the Australia
+
+```{r world_map }
+data(World)
+
+log %>% 
+  filter( country_code != 'AU'  ) %>%
+  count(longitude, latitude, user_full_name, semester_week ) %>% 
+  mutate( logn=log10( n ) ) %>%
+  SpatialPointsDataFrame(coords = .[,1:2], data=., proj4string=CRS("+proj=longlat +datum=WGS84")) %>% 
+  { . } -> users
+
+#
+tm_shape(World) +
+  tm_borders() + 
+  tm_shape( users ) +
+  tm_bubbles( size='logn', col='semester_week') +
+  tm_style("gray") + 
+  tm_format("World") +
+  tm_layout("LMS accesses outside Australia")
+
+#tmap_mode("plot")
+
+eval_cell=TRUE
+
+```
+
+
+`r if (eval_cell) '# total access vs marks for 5 most accessed components'`
+
+```{r top_5, eval=eval_cell  }
+# access vs marks
+
+log %>%
+  filter( component %in% top5_component$component ) %>%
+  count( user_full_name, component )  %>%
+  inner_join( marks ) %>%
+  ggplot( aes(subject_total_real, n)) +
+  xlab( "Total Subject Mark") +
+  ylab( "Number of LMS Accesses ") + 
+  geom_point() +
+  geom_smooth(method = "lm") +
+  facet_wrap( ~component, scales='free_y', ncol=2 )
+
+```
+
+`r if (eval_cell) '# access vs marks overall by person'`
+
+```{r  access_by_person, eval=eval_cell }
+
+if (private) {
+
+  log %>%
+    count( user_full_name)  %>%
+    inner_join( marks ) %>%
+    ggplot( aes(subject_total_real, n)) +
+    xlab( "Total Subject Mark") +
+    ylab( "Number of LMS Accesses ") + 
+    geom_smooth() +
+    geom_text(aes(label=user_full_name)) +
+    geom_point()
+
+}
+
+
+```
+
+`r if (eval_cell) '# access vs marks overall by person and week'`
+
+
+```{r person_mark}
+
+if (private) {
+
+  log %>%
+    count( user_full_name, semester_week)  %>%
+    inner_join( marks ) %>%
+    ggplot( aes(subject_total_real, n)) +
+    xlab( "Total Subject Mark") +
+    ylab( "Number of LMS Accesses ") + 
+    geom_smooth() +
+    geom_text(aes(label=substr(user_full_name,1,5))) +
+    geom_point() +
+    facet_wrap( ~semester_week, scales='free_y', ncol=3 )
+
+
+  log %>%
+    count( user_full_name, component)  %>%
+    inner_join( marks ) %>%
+    ggplot( aes(subject_total_real, n)) +
+    xlab( "Total Subject Mark") +
+    ylab( "Number of LMS Accesses ") + 
+    geom_smooth() +
+    geom_text(aes(label=substr(user_full_name,1,5))) +
+    geom_point() +
+    facet_wrap( ~component, scales='free_y', ncol=3 )
+
+
+  log %>%
+    count( user_full_name, component)  %>%
+    inner_join( marks ) %>%
+    ggscatter( x='subject_total_real',y= 'n',
+              add = "reg.line", conf.int = TRUE, 
+              cor.coef = TRUE, cor.method = "pearson",
+              ) +
+  xlab( "Total Subject Mark") +
+  ylab( "Number of LMS Accesses ") + 
+  facet_wrap( ~component, scales='free_y', ncol=3 )
+
+
+
+
+  log %>%
+    count( user_full_name, semester_week)  %>%
+    inner_join( marks ) %>%
+    ggscatter( x='subject_total_real',y= 'n',
+              add = "reg.line", conf.int = TRUE, 
+              cor.coef = TRUE, cor.method = "pearson",
+              ) +
+    xlab( "Total Subject Mark") +
+    ylab( "Number of LMS Accesses ") + 
+    facet_wrap( ~semester_week, scales='free_y', ncol=3 )
+
+}
+
 
 ```
 
 # quiz access density
 ```{r}
 
+marks %>%
+  select( user_full_name, starts_with('quiz' ) ) %>%
+  gather( key, value, -user_full_name) %>% 
+  mutate( semester_week = str_replace_all( key, '[^0-9]', '') %>% as.numeric(), 
+          mark = ifelse( is.na(value), 0, value),
+          mark=value
+          ) %>%
+  { . } -> quiz_marks
+
+if (private) {
+  log %>%
+    filter( startsWith( component, "Quiz")) %>%
+    group_by( semester_week ) %>%
+    count( user_full_name, component ) %>%
+    ggplot( aes( semester_week, n, fill=component)) +
+    geom_col() +
+    facet_wrap( ~user_full_name, ncol=3) 
+}
+
 log %>%
   filter( startsWith( component, "Quiz")) %>%
   group_by( semester_week ) %>%
-  count( user_full_name, component ) %>%
-  ggplot( aes( semester_week, n, fill=component)) +
-  geom_col() +
-  facet_wrap_paginate( ~user_full_name, ncol=3, nrow=3) %>% 
-  { . } ->  p
-class(p) <- c('gg_multiple', class(p))
-print(p)
+  count( user_full_name, subject_code ) %>%
+  inner_join( quiz_marks ) %>%
+  ggplot( aes( n, mark, color=subject_code, fill=subject_code)) +
+  geom_point() +
+  ylab('quiz mark / 10 ' ) + xlab( 'number of LMS accesses') +
+  facet_wrap( ~semester_week, ncol=1) 
 
 
 ```
@@ -117,18 +391,18 @@ log %>%
 
 ```{r}
 
+if (private ) {
+  log %>%
+    count( user_full_name)  %>%
+    inner_join( marks ) %>%
+    ggplot( aes(subject_total_real, n)) +
+    xlab( "Total Subject Mark") +
+    ylab( "Number of LMS Accesses ") + 
+    geom_smooth() +
+    geom_text(aes(label=user_full_name)) +
+    geom_point()
 
-log %>%
-  count( user_full_name)  %>%
-  inner_join( marks ) %>%
-  ggplot( aes(subject_total_real, n)) +
-  xlab( "Total Subject Mark") +
-  ylab( "Number of LMS Accesses ") + 
-  geom_smooth() +
-  geom_text(aes(label=user_full_name)) +
-  geom_point()
-
-
+}
 
 ```
 
@@ -136,64 +410,55 @@ log %>%
 
 
 ```{r}
+if (private) {
+  log %>%
+    count( user_full_name, semester_week)  %>%
+    inner_join( marks ) %>%
+    ggplot( aes(subject_total_real, n)) +
+    xlab( "Total Subject Mark") +
+    ylab( "Number of LMS Accesses ") + 
+    geom_smooth() +
+    geom_text(aes(label=substr(user_full_name,1,5))) +
+    geom_point() +
+    facet_wrap( ~semester_week, scales='free_y', ncol=3 )
 
-log %>%
-  count( user_full_name, semester_week)  %>%
-  inner_join( marks ) %>%
-  ggplot( aes(subject_total_real, n)) +
+
+
+  log %>%
+    count( user_full_name, component)  %>%
+    inner_join( marks ) %>%
+    ggplot( aes(subject_total_real, n)) +
+    xlab( "Total Subject Mark") +
+    ylab( "Number of LMS Accesses ") + 
+    geom_smooth() +
+    geom_text(aes(label=substr(user_full_name,1,5))) +
+    geom_point() +
+    facet_wrap( ~component, scales='free_y', ncol=3 )
+
+
+  log %>%
+    count( user_full_name, component)  %>%
+    inner_join( marks ) %>%
+    ggscatter( x='subject_total_real',y= 'n',
+              add = "reg.line", conf.int = TRUE, 
+              cor.coef = TRUE, cor.method = "pearson",
+              ) +
   xlab( "Total Subject Mark") +
   ylab( "Number of LMS Accesses ") + 
-  geom_smooth() +
-  geom_text(aes(label=substr(user_full_name,1,5))) +
-  geom_point() +
-  facet_wrap( ~semester_week, scales='free_y', ncol=3 )
-
-
-
-log %>%
-  count( user_full_name, component)  %>%
-  inner_join( marks ) %>%
-  ggplot( aes(subject_total_real, n)) +
-  xlab( "Total Subject Mark") +
-  ylab( "Number of LMS Accesses ") + 
-  geom_smooth() +
-  geom_text(aes(label=substr(user_full_name,1,5))) +
-  geom_point() +
   facet_wrap( ~component, scales='free_y', ncol=3 )
 
 
-log %>%
-  count( user_full_name, component)  %>%
-  inner_join( marks ) %>%
-  ggscatter( x='subject_total_real',y= 'n',
-            add = "reg.line", conf.int = TRUE, 
-            cor.coef = TRUE, cor.method = "pearson",
-            ) +
-xlab( "Total Subject Mark") +
-ylab( "Number of LMS Accesses ") + 
-facet_wrap( ~component, scales='free_y', ncol=3 )
-
-
-
-
-ggplot(marks, aes(subject_total_real)) +
-  geom_histogram(bins=10)
-
-ggdensity( marks$subject_total_real)
-ggqqplot( marks$subject_total_real)
-shapiro.test( marks$subject_total_real)
-
-log %>%
-  count( user_full_name, semester_week)  %>%
-  inner_join( marks ) %>%
-  ggscatter( x='subject_total_real',y= 'n',
-            add = "reg.line", conf.int = TRUE, 
-            cor.coef = TRUE, cor.method = "pearson",
-            ) +
-  xlab( "Total Subject Mark") +
-  ylab( "Number of LMS Accesses ") + 
-  facet_wrap( ~semester_week, scales='free_y', ncol=3 )
-
+  log %>%
+    count( user_full_name, semester_week)  %>%
+    inner_join( marks ) %>%
+    ggscatter( x='subject_total_real',y= 'n',
+              add = "reg.line", conf.int = TRUE, 
+              cor.coef = TRUE, cor.method = "pearson",
+              ) +
+    xlab( "Total Subject Mark") +
+    ylab( "Number of LMS Accesses ") + 
+    facet_wrap( ~semester_week, scales='free_y', ncol=3 )
+}
 
 
 # access vs quiz marks for each week of the semester  
@@ -253,18 +518,21 @@ reorder_size <- function(x) {
   factor(x, levels = names(sort(table(x))))
 }
 
-log %>%
-  filter( isp != 'Latrobe University' &
-         city_name != 'Melbourne'  &
-         city_name != 'Bundoora' ) %>% 
-  inner_join( count( ., city_name ) %>% top_n( 20) ) %>%
-  inner_join( count( ., city_name, user_full_name ) %>% top_n( 20) ) %>%
-  inner_join( marks ) %>%
-  count( user_full_name, city_name, subject_total_real ) %>%
-  ggplot(aes(reorder_size( city_name), fill=user_full_name, y=nnn, label=subject_total_real)) +
-  geom_bar(stat='identity') + 
-  geom_text( )+
-  rotate()
+if (private ) {
+
+  log %>%
+    filter( isp != 'Latrobe University' &
+          city_name != 'Melbourne'  &
+          city_name != 'Bundoora' ) %>% 
+    inner_join( count( ., city_name ) %>% top_n( 20) ) %>%
+    inner_join( count( ., city_name, user_full_name ) %>% top_n( 20) ) %>%
+    inner_join( marks ) %>%
+    count( user_full_name, city_name, subject_total_real ) %>%
+    ggplot(aes(reorder_size( city_name), fill=user_full_name, y=nnn, label=subject_total_real)) +
+    geom_bar(stat='identity') + 
+    geom_text( )+
+    rotate()
+}
 
   
 
@@ -275,13 +543,15 @@ log %>%
 ```{r }
 
 
-log %>%
-  filter( isp != 'Latrobe University' &
-         city_name != 'Melbourne'  &
-         city_name != 'Bundoora' ) %>% 
-  ggplot(aes(reorder_size( city_name), fill=user_full_name)) +
-  geom_bar() + 
-  rotate()
+if (private ) {
+  log %>%
+    filter( isp != 'Latrobe University' &
+          city_name != 'Melbourne'  &
+          city_name != 'Bundoora' ) %>% 
+    ggplot(aes(reorder_size( city_name), fill=user_full_name)) +
+    geom_bar() + 
+    rotate()
+}
 
 ```
 
@@ -345,4 +615,3 @@ tm_shape(World) +
 
 ```
 
-rc
