@@ -18,6 +18,7 @@ suppressMessages(library(tidyverse))
 library(ggpubr)
 
 marks_root = '2018-HIM3HIB'
+marks_root = '2018-HIM4IHS'
 
 
 get_data = function( marks_root ) {
@@ -145,11 +146,15 @@ get_data = function( marks_root ) {
   #
   marks %<>% 
     rename( student_id = la_trobe_student_id ) %>%
-    mutate( student_id = as.character( student_id )) %>%
-    inner_join( classlist %>% 
+    mutate( student_id = as.character( as.numeric(student_id) )) %>%
+    inner_join( 
+               
+               classlist %>% 
                select( student_code, display_subject_code) %>%
                rename( student_id = student_code, 
-                      subject_code = display_subject_code ), 
+                      subject_code = display_subject_code )
+               
+               , 
                by = 'student_id')
  
   log %<>% 

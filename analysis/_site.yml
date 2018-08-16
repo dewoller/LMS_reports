@@ -5,6 +5,12 @@ navbar:
   left:
     - text: "Home"
       href: index.html
+    - text: "Classes"
+      menu:
+      - text: "Informatics B"
+        href: ProcessIHBLogs.html
+      - text: "Project Management"
+        href: ProcessHSILogs.html
     - text: "About"
       href: about.html
     - text: "License"
