@@ -1,5 +1,5 @@
 ---
-title:           new document
+title:           2018-HIM3HIB / HIM5IHB Stats and grades
 author:          Dennis Wollersheim 
 date:            16.06.2018
 linkcolor:       cyan
@@ -12,7 +12,6 @@ output:
     fig_width: 10
     fig_height: 6.5
 ---
-
 
 
 ```{r init_data, results='hide', message=FALSE, warning=FALSE, echo=FALSE, comment=NA }
@@ -34,7 +33,8 @@ marks = data[['marks']]
 # Marks for the class `r  class_name`
 For the period : `r log %>% summarise( min(time), max(time)) `
 ---
-## Overall LMS participation by student
+`r if (!private) '## Overall LMS participation by student'`
+
 
 ```{r introduction }
 
@@ -48,6 +48,13 @@ if (private)  {
     facet_wrap( ~user_full_name, ncol=3) 
 
 }
+```
+
+## Summary LMS participation by student
+---
+
+
+```{r Summary_by_student_last_digit }
 
 log %>%
   group_by( semester_week ) %>%
@@ -153,7 +160,7 @@ ggtitle( 'Top 20 localities for access LMS from off campus')
 
 ```
 
-# non bundoora / melbourne / latrobe cities
+`r if (!private) '# non bundoora / melbourne / latrobe cities'`
 
 ```{r }
 
