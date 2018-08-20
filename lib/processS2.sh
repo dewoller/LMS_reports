@@ -11,5 +11,7 @@ cd  /mnt/sda5/code/R/teaching/processLMSLogs
 
 Rscript -e 'workflowr::wflow_publish("analysis/processIHBLogs.Rmd")'
 Rscript -e 'workflowr::wflow_publish("analysis/processHSILogs.Rmd")'
+git push
+
 
 
