@@ -23,8 +23,22 @@ private=FALSE
 pdf=FALSE
 weeks_semester_start = 30
 
+
 data = get_data( marks_root )
-log = data[['log']]
+
+data[['log']] %>%
+  mutate( time_dow = weekdays( time ), 
+          time_hour = hour( time), 
+          lab=NA,
+          lab = ifelse( (is.na(lab) & time_dow == "Monday" & (time_hour==10 | time_hour==11)), 1, NA) ,
+          lab = ifelse( (is.na(lab) & time_dow == "Wednesday" & (time_hour==12 | time_hour==11)), 2, lab) ,
+          lab = ifelse( (is.na(lab) & time_dow == "Wednesday" & (time_hour==14 | time_hour==15)), 3, lab) ,
+          lab = ifelse( (is.na(lab) ), 0, lab) ,
+          lab= factor( lab, levels=0:3, labels=c('None', 'Monday', 'Weds AM', 'Weds PM') )
+         ) %>% 
+         { . } -> log
+
+
 class_name = data[['class_name']]
 marks = data[['marks']]
 
@@ -49,7 +63,70 @@ if (private)  {
     geom_col() +
     facet_wrap( ~user_full_name, ncol=3) 
 
+ log %>%
+   filter( lab != 'None') %>%
+   filter(semester_week>0) %>%
+    group_by( semester_week ) %>%
+    count( user_full_name, lab ) %>%
+    ggplot( aes( semester_week, n, fill=lab)) +
+    geom_col() +
+    facet_wrap( ~user_full_name, ncol=3) 
+
 }
+```
+
+# Lab attendence
+
+```{r lab_participation}
+
+log %>%
+  mutate( in_lab =ifelse( lab=='None', 0,1)) %>%
+  distinct( user_full_name, student_id_final_digit , semester_week, in_lab ) %>%
+  filter(semester_week>0) %>%
+  group_by( user_full_name, student_id_final_digit  ) %>%
+  summarise( n=sum(in_lab)) %>% 
+  { . } -> temp
+  
+ggplot( temp, aes( user_full_name, n, fill=n)) +
+scale_x_discrete( labels=temp$student_id_final_digit ) +
+geom_col() +
+scale_colour_distiller(direction=-1) +
+xlab('student id final digit') +
+ylab( 'number of labs attended (according to LMS accesses)') +
+ggtitle('Student by number of labs attended') 
+
+
+if (private) {
+
+log %>%
+    mutate( in_lab =ifelse( lab=='None', 0,1)) %>%
+    distinct( subject_code, user_full_name, student_id_final_digit , semester_week, in_lab ) %>%
+    filter(semester_week>0) %>%
+    count( subject_code, user_full_name, student_id_final_digit , semester_week, in_lab ) %>%
+    group_by( user_full_name, in_lab ) %>%
+    summarise( n=sum(n)) %>%
+    ggplot( aes( user_full_name, n, fill=as.factor(in_lab))) +
+    geom_col() +
+    ylab( 'number of LMS acceesses in in the period ') +
+    ggtitle('Student by LMS access in side/outside; measure of consistency') +
+    rotate()
+
+}
+
+log %>%
+  mutate( in_lab =ifelse( lab=='None', 0,1)) %>%
+  distinct( subject_code, user_full_name, student_id_final_digit , semester_week, in_lab ) %>% # do students access in a week i/o
+  filter(semester_week>0) %>%
+  count( subject_code,  semester_week, in_lab ) %>%
+  group_by( semester_week, subject_code ) %>%
+  mutate( pct = n/sum(n)*100) %>% 
+  ungroup() %>%
+  ggplot(aes(as.factor(semester_week), pct, fill=subject_code, group=subject_code)) + 
+  geom_col( position='dodge' ) + 
+  ylab( '% student access ') +
+  ggtitle('Is a student more likely to access inside lab or outside?') 
+
+
 ```
 
 ## Summary LMS participation by student
