@@ -71,10 +71,11 @@ get_data = function( marks_root ) {
   log_file_name %>%
     read_csv() %>% 
     set_names( names(.) %>% tolower() %>% str_replace_all(" ", "_")) %>%
-    mutate( time = as.Date( time, format='%d/%m/%y' )) %>% 
+    mutate( time = dmy_hm( time)) %>% 
     mutate( mm_country=maxmind(ip_address, mmfile, "country_name")[[1]]) %>%
     mutate( semester_week = week( time ) - weeks_semester_start ) %>%
     { . } -> log
+
   system( paste0( 'mv "', log_file_name, '" logs/'))
 
   #
@@ -101,9 +102,8 @@ get_data = function( marks_root ) {
   log %>%
     count( user_full_name, sort = TRUE) -> loggers
 
-  loggers %>% anti_join( marks ) -> losers
-  log %<>% anti_join( losers )
-
+  loggers %>% anti_join( marks ) -> losers  
+  log %<>% anti_join( losers )  # eliminate people who are not enrolled
 
   # get ip addresses
   #
