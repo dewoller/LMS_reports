@@ -24,7 +24,7 @@ pdf=FALSE
 weeks_semester_start = 30
 
 
-data = get_data( marks_root )
+data = get_data( marks_root, weeks_semester_start )
 
 data[['log']] %>%
   mutate( time_dow = weekdays( time ), 
@@ -34,7 +34,8 @@ data[['log']] %>%
           lab = ifelse( (is.na(lab) & time_dow == "Wednesday" & (time_hour==12 | time_hour==11)), 2, lab) ,
           lab = ifelse( (is.na(lab) & time_dow == "Wednesday" & (time_hour==14 | time_hour==15)), 3, lab) ,
           lab = ifelse( (is.na(lab) ), 0, lab) ,
-          lab= factor( lab, levels=0:3, labels=c('None', 'Monday', 'Weds AM', 'Weds PM') )
+          lab= factor( lab, levels=0:3, labels=c('None', 'Monday', 'Weds AM', 'Weds PM') ),
+          lab_week = ifelse( lab == 'Monday', semester_week - 1, semester_week )
          ) %>% 
          { . } -> log
 
@@ -65,10 +66,10 @@ if (private)  {
 
  log %>%
    filter( lab != 'None') %>%
-   filter(semester_week>0) %>%
-    group_by( semester_week ) %>%
+   filter(lab_week>0) %>%
+    group_by( lab_week) %>%
     count( user_full_name, lab ) %>%
-    ggplot( aes( semester_week, n, fill=lab)) +
+    ggplot( aes( lab_week, n, fill=lab)) +
     geom_col() +
     facet_wrap( ~user_full_name, ncol=3) 
 
@@ -115,13 +116,13 @@ log %>%
 
 log %>%
   mutate( in_lab =ifelse( lab=='None', 0,1)) %>%
-  distinct( subject_code, user_full_name, student_id_final_digit , semester_week, in_lab ) %>% # do students access in a week i/o
-  filter(semester_week>0) %>%
-  count( subject_code,  semester_week, in_lab ) %>%
-  group_by( semester_week, subject_code ) %>%
+  distinct( subject_code, user_full_name, student_id_final_digit , lab_week, in_lab ) %>% # do students access in a week i/o
+  filter(lab_week>0) %>%
+  count( subject_code,  lab_week, in_lab ) %>%
+  group_by( lab_week, subject_code ) %>%
   mutate( pct = n/sum(n)*100) %>% 
   ungroup() %>%
-  ggplot(aes(as.factor(semester_week), pct, fill=subject_code, group=subject_code)) + 
+  ggplot(aes(as.factor(lab_week), pct, fill=subject_code, group=subject_code)) + 
   geom_col( position='dodge' ) + 
   ylab( '% student access ') +
   ggtitle('Is a student more likely to access inside lab or outside?') 
@@ -413,5 +414,4 @@ log %>%
   ylab( "Number of LMS Accesses ") + 
   facet_wrap( ~semester_week, scales='free_y', ncol=3 )
 
-}
 
