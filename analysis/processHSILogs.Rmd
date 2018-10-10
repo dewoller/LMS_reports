@@ -24,7 +24,7 @@ weeks_semester_start = 30
 private=FALSE
 pdf=FALSE
 
-data = get_data( marks_root )
+data = get_data( marks_root, weeks_semester_start )
 log = data[['log']]
 class_name = data[['class_name']]
 marks = data[['marks']]
