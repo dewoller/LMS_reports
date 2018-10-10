@@ -392,26 +392,29 @@ log %>%
 log %>%
   count( user_full_name, component)  %>%
   inner_join( marks ) %>%
-  ggscatter( x='subject_total_real',y= 'n',
-            add = "reg.line", conf.int = TRUE, 
-            cor.coef = TRUE, cor.method = "pearson",
-            ) +
-xlab( "Total Subject Mark") +
-ylab( "Number of LMS Accesses ") + 
-facet_wrap( ~component, scales='free_y', ncol=3 )
-
-
-
-
-log %>%
-  count( user_full_name, semester_week)  %>%
-  inner_join( marks ) %>%
-  ggscatter( x='subject_total_real',y= 'n',
-            add = "reg.line", conf.int = TRUE, 
-            cor.coef = TRUE, cor.method = "pearson",
-            ) +
+  select( user_full_name, subject_total_real, n, component) %>%
+  ggplot( aes( y=subject_total_real,x= n)) +
+  geom_smooth() +
+  geom_text(aes(label=substr(user_full_name,1,5))) +
+  geom_point() +
   xlab( "Total Subject Mark") +
   ylab( "Number of LMS Accesses ") + 
-  facet_wrap( ~semester_week, scales='free_y', ncol=3 )
+  facet_wrap( ~component, scales='free_x', ncol=3 )
+
+log %>%
+  count( user_full_name, lab_week)  %>%
+  inner_join( marks ) %>%
+  select( user_full_name, subject_total_real, n, lab_week) %>%
+  ggplot( aes( y=subject_total_real,x= n)) +
+  geom_smooth() +
+  geom_text(aes(label=substr(user_full_name,1,5))) +
+  geom_point() +
+xlab( "Total Subject Mark") +
+ylab( "Number of LMS Accesses ") + 
+facet_wrap( ~lab_week, scales='free_x', ncol=3 )
+
+
+``` 
+
 
 
