@@ -413,8 +413,11 @@ xlab( "Total Subject Mark") +
 ylab( "Number of LMS Accesses ") + 
 facet_wrap( ~lab_week, scales='free_x', ncol=3 )
 
+read.csv( '~/asdf.csv') %>% 
+  as.tibble() %>%
+  gather( diag, code, -LOS, -Sex, -Birthi ) 
 
-``` 
+```  
 
 
 
